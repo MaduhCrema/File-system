@@ -25,21 +25,26 @@ int file_size(char file_name[12]){
 
 int main(){
 
-    char file_name[12], k;
+    char file_name[12], k, image_name[12];
     int rootdir = 512;
 
-    cout << "Qual o nome do arquivo que você deseja tranferir para o sistema de arquivos?" << endl;
+    cout << "Qual o nome do arquivo que você deseja copiar para o sistema de arquivos?" << endl;
     cin >> file_name; 
 
     int size = file_size(file_name);
     if (size == -1)
         return 0;
 
+    cout << "Para qual imagem você deseja fazer a cópia?" << endl;
+    cin >> image_name; 
 
+    ifstream in(file_name);
+    ofstream out(image_name);
 
-    // ifstream in(file_name);
+    out.seekp(rootdir, std::ios::beg);
 
-    // while (in >> k && k != 0) {
-    
-    // }
+    for (int i = 0; i < size; i++){
+        in >> k;
+        out << k;
+    }
 }
