@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <iostream>
 #include <fstream>
 using namespace std;
@@ -94,7 +92,7 @@ bool rootdir(copia informacoes){
         return false;
 }
 
-bool escrita(copia informacoes){
+void escrita(copia informacoes){
 
     ifstream in(informacoes.file_name);
     ofstream out(informacoes.image_name);
@@ -108,6 +106,8 @@ bool escrita(copia informacoes){
         in >> k;
         out << k;
     }
+
+    cout << "SUAS INFORMAÇÕES FORAM GRAVADAS NO SISTEMA DE ARQUIVOS";
 
 }
 
