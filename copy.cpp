@@ -1,50 +1,135 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <vector>
 #include <iostream>
 #include <fstream>
 using namespace std;
-#include <math.h>
 
-int file_size(char file_name[12]){
+typedef struct {
+    char file_name[12], image_name[12];
+    int numero_setores;
+    int size;
+    long long int primeiro_sector;
+}copia;
+
+int file_size(copia informacoes){
      
-    std::ifstream file(file_name, std::ios::binary);
+    ifstream in(informacoes.file_name, std::ios::binary);
 
-    if (!file.is_open()) {
+    if (!in.is_open()) {
         std::cerr << "Erro na abertura do arquivo" << std::endl;
         return -1;
     }
 
-    file.seekg(0, std::ios::end);
-    std::streampos filesize = file.tellg();
-    file.close(); 
+    in.seekg(0, std::ios::end);
+    std::streampos filesize = in.tellg();
+    in.close(); 
 
     return filesize;
 }
 
+long long int primeiro_setor(copia informacoes){
+    
+    ifstream in(informacoes.image_name);
+    ofstream out(informacoes.image_name);
+    long long int bitmap, tamanho_bitmap, primeiro_sector;
+
+    in.seekg(12, std::ios::beg);
+    in >> bitmap;
+    
+    in.seekg(20, std::ios::beg);
+    in >> tamanho_bitmap;
+    
+    in.seekg(bitmap, std::ios::beg);
+    int aux;
+
+    for (int i = 0; i < tamanho_bitmap; i++){
+        if(i == 0)
+            aux++;
+        else
+            aux = 0;
+        if(aux == informacoes.numero_setores){
+            aux = i;
+            break;
+        }else if (i == tamanho_bitmap){
+            aux = -1;
+        }
+    }
+    if(aux < 0){
+        cout << "ERRO! NÃO EXISTE ESPAÇO EM MEMORIA" << endl;
+        primeiro_sector = -1;
+    }else{
+        primeiro_sector = (aux-informacoes.numero_setores+1);
+        out.seekp(bitmap+(512*primeiro_sector), std::ios::beg);
+        for(int i = 0; i < informacoes.numero_setores; i++)
+            out << 1;
+    }
+
+    in.close();
+    return primeiro_sector;
+}
+
+bool rootdir(copia informacoes){
+
+    ifstream in(informacoes.file_name);
+    ofstream out(informacoes.image_name);
+     
+    short int temp;
+
+    for (int i = 0; i < 128; i++){
+        out.seekp(512+(i*32), std::ios::beg);
+        in >> temp;
+        if(temp == 0){
+            out << informacoes.file_name;
+            out << informacoes.primeiro_sector;
+            out << informacoes.size;
+            out << informacoes.numero_setores;
+            temp = -1;
+            break;
+        }
+    }
+    if (temp == -1)
+        return true;
+    else 
+        return false;
+}
+
+bool escrita(copia informacoes){
+
+    ifstream in(informacoes.file_name);
+    ofstream out(informacoes.image_name);
+
+    informacoes.primeiro_sector = 4608 + (informacoes.primeiro_sector*512);
+    out.seekp(informacoes.primeiro_sector, std::ios::beg);
+
+    unsigned int k;
+
+    for (int i = 0; i < informacoes.size; i++){
+        in >> k;
+        out << k;
+    }
+
+}
+
 int main(){
 
-    char file_name[12], k, image_name[12];
-    int rootdir = 512;
+    copia informacoes;
 
     cout << "Qual o nome do arquivo que você deseja copiar para o sistema de arquivos?" << endl;
-    cin >> file_name; 
+    cin >> informacoes.file_name; 
 
-    int size = file_size(file_name);
+    int size = file_size(informacoes);
     if (size == -1)
         return 0;
 
     cout << "Para qual imagem você deseja fazer a cópia?" << endl;
-    cin >> image_name; 
+    cin >> informacoes.image_name; 
 
-    ifstream in(file_name);
-    ofstream out(image_name);
+    informacoes.numero_setores = size/512;
 
-    out.seekp(rootdir, std::ios::beg);
+    long long int primeiro_sector = primeiro_setor(informacoes);
+    if (primeiro_sector < 0)
+        return 0;
 
-    for (int i = 0; i < size; i++){
-        in >> k;
-        out << k;
-    }
+    rootdir(informacoes);
 }
