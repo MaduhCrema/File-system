@@ -102,7 +102,7 @@ bool escrita(copia informacoes){
     informacoes.primeiro_sector = 4608 + (informacoes.primeiro_sector*512);
     out.seekp(informacoes.primeiro_sector, std::ios::beg);
 
-    unsigned int k;
+    char k;
 
     for (int i = 0; i < informacoes.size; i++){
         in >> k;
