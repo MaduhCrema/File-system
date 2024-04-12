@@ -92,7 +92,7 @@ bool rootdir(copia informacoes){
         return false;
 }
 
-void escrita(copia informacoes){
+void escrita_fs(copia informacoes){
 
     ifstream in(informacoes.file_name);
     ofstream out(informacoes.image_name);
@@ -132,4 +132,5 @@ int main(){
         return 0;
 
     rootdir(informacoes);
+    escrita_fs(informacoes);
 }

@@ -11,7 +11,7 @@ typedef struct {
     int entrada_diretorio;
 }copia;
 
-copia localiza_arquivo(copia informacoes){
+copia localiza_arquivo_fs(copia informacoes){
 
     char file_SA[12];
 
@@ -44,7 +44,7 @@ copia localiza_arquivo(copia informacoes){
             return informacoes;
 }
 
-void cria_copia(copia informacoes){
+void cria_copia_disco(copia informacoes){
 
     ifstream in(informacoes.image_name);
     ofstream out(informacoes.file_name);
@@ -71,12 +71,8 @@ int main(){
     cout << "Em que imagem este arquivo está localizado?" << endl;
     cin >> informacoes.image_name; 
 
-    localiza_arquivo(informacoes);
+    localiza_arquivo_fs(informacoes);
     if (informacoes.primeiro_sector == 1)
         return 0;
-
-    
-
-
 
 }
