@@ -11,20 +11,9 @@ typedef struct {
     int entrada_diretorio;
 }copia;
 
-// 3. se existir, ir até primeiro cluster
-// 4. criar arquivo no disco rigido
-// 5. passas as informações
+copia localiza_arquivo(copia informacoes){
 
-int main(){
-
-    copia informacoes;
     char file_SA[12];
-   
-    cout << "Qual o nome do arquivo que você deseja copiar para o sistema de arquivos?" << endl;
-    cin >> informacoes.file_name; 
-
-    cout << "Em que imagem este arquivo está localizado?" << endl;
-    cin >> informacoes.image_name; 
 
     ifstream in(informacoes.image_name);
     in.seekg(512, std::ios::beg);
@@ -49,9 +38,45 @@ int main(){
 
         if (i == 127){
             cout << "NÃO FOI POSSÍVEL ENCONTRAR SEU ARQUIVO" << endl;
-            return 0;
+            informacoes.primeiro_sector = -1;
         }
     }
+            return informacoes;
+}
+
+void cria_copia(copia informacoes){
+
+    ifstream in(informacoes.image_name);
+    ofstream out(informacoes.file_name);
+
+    in.seekg(4608+(512*informacoes.primeiro_sector), std::ios::beg);
+
+    char k;
+    for (int i = 0; i < informacoes.size; i++){
+        in >> k;
+        out << k;
+    }
+
+    cout << "SUAS INFORMAÇÕES FORAM GRAVADAS NO SISTEMA DE ARQUIVOS";
+
+}
+
+int main(){
+
+    copia informacoes;
     
+    cout << "Qual o nome do arquivo que você deseja copiar para o sistema de arquivos?" << endl;
+    cin >> informacoes.file_name; 
+
+    cout << "Em que imagem este arquivo está localizado?" << endl;
+    cin >> informacoes.image_name; 
+
+    localiza_arquivo(informacoes);
+    if (informacoes.primeiro_sector == 1)
+        return 0;
+
+    
+
+
 
 }
