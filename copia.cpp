@@ -111,6 +111,7 @@ void escrita_em_fs(copia informacoes){
 
     for (int i = 0; i < informacoes.size; i++){
         in >> k;
+        k = 1;
         out << k;
     }
 
@@ -209,7 +210,6 @@ int main(){
             cout << "ERRO! NÃO EXISTE ESPAÇO EM MEMORIA" << endl;
             return 0;
          }
-        escrita_em_fs(informacoes);
 
         ifstream in(informacoes.file_name);
         ofstream out(informacoes.image_name);
@@ -236,6 +236,8 @@ int main(){
 
             }}        
         return 0;
+
+       escrita_em_fs(informacoes);
 
     }default:
         break;
