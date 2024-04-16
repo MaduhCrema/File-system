@@ -6,55 +6,52 @@
 using namespace std;
 
 typedef struct {
-    char file_name[12], image_name[12];
+    char file_name[12], image_name[15];
     int numero_setores;
     int size;
     long long int primeiro_sector;
     int entrada_diretorio;
+    long long int bitmap;
 }copia;
 
-int file_size(copia informacoes){
-
-    ifstream in(informacoes.file_name, std::ios::binary);
+int file_size(copia informacoes) {
+    ifstream in(informacoes.file_name);
 
     if (!in.is_open()) {
-        std::cerr << endl << "ERRO NA ABERTURA DO ARQUIVO" << std::endl;
+        cerr << endl << "ERRO NA ABERTURA DO ARQUIVO" << endl;
         return -1;
     }
 
-    in.seekg(0, std::ios::end);
-    std::streampos filesize = in.tellg();
+    in.seekg(0, ios::end);
+    streampos filesize = in.tellg();
     in.close(); 
 
+    cout << "tamanho: " << filesize << " bytes" << endl;
     return filesize;
 }
 
-long long int encontrar_primeiro_setor(copia informacoes){
+copia encontrar_primeiro_setor(copia informacoes){
 
-    std::ifstream in(informacoes.image_name);
-    if (!in.is_open()) {
-        std::cerr << endl << endl << "ERRO NA ABERTURA DO ARQUIVO" << std::endl;
-        return -1;
-    }
+    long long int tamanho_bitmap;
+    FILE *fp;
+ 
+    fp = fopen(informacoes.image_name, "rb");
 
-    ofstream out(informacoes.image_name);
-    long long int bitmap, tamanho_bitmap, primeiro_sector;
+    fseek(fp, 14, SEEK_SET);
+    fread(&informacoes.bitmap ,8,1, fp);
 
-    in.seekg(12, std::ios::beg);
-    in >> bitmap;
-    
-    in.seekg(20, std::ios::beg);
-    in >> tamanho_bitmap;
-    
-    in.seekg(bitmap, std::ios::beg);
-    int aux;
+    fseek(fp, 22, SEEK_SET);
+    fread(&tamanho_bitmap ,8,1, fp);
 
+    int aux, cont;
     for (int i = 0; i < tamanho_bitmap; i++){
-        if(i == 0)
-            aux++;
+        fseek(fp, (informacoes.bitmap*512)+i, SEEK_SET);
+        fread(&aux, 1,1, fp);
+        if(aux == 0)
+            cont++;
         else
-            aux = 0;
-        if(aux == informacoes.numero_setores){
+            cont = 0;
+        if(cont == informacoes.numero_setores){
             aux = i;
             break;
         }else if (i == tamanho_bitmap){
@@ -63,42 +60,43 @@ long long int encontrar_primeiro_setor(copia informacoes){
     }
     if(aux < 0){
         cout << "ERRO! NÃO EXISTE ESPAÇO EM MEMORIA" << endl;
-        primeiro_sector = -1;
+        informacoes.primeiro_sector = -1;
     }else{
-        primeiro_sector = (aux-informacoes.numero_setores+1);
-        out.seekp(bitmap+(512*primeiro_sector), std::ios::beg);
-        for(int i = 0; i < informacoes.numero_setores; i++)
-            out << 1;
+        ofstream out(informacoes.image_name);
+        informacoes.primeiro_sector = (aux-informacoes.numero_setores+1);
     }
 
-    in.close();
-    return primeiro_sector;
+    return informacoes;
 }
 
-bool aloca_entrada_rootdir(copia informacoes){
+void aloca_entrada_rootdir(copia informacoes) {
 
-    ifstream in(informacoes.file_name);
-    ofstream out(informacoes.image_name);
-     
-    short int temp;
+        ifstream in("teste.txt");
+        ofstream out("disk_image.bin");
+        int temp;
 
-    for (int i = 0; i < 128; i++){
-        out.seekp(512+(i*32), std::ios::beg);
+    for(int i = 0; i < 128; i++){
+        int aux = 512+(i*32);
+        out.seekp(aux, std::ios::beg);
         in >> temp;
+
         if(temp == 0){
-            out << informacoes.file_name;
-            out << informacoes.primeiro_sector;
-            out << informacoes.size;
-            out << informacoes.numero_setores;
-            temp = -1;
-            break;
-        }
-    }
-    if (temp == -1)
-        return true;
-    else 
-        return false;
+                out.seekp(aux, std::ios::beg);
+                out << "informacoes.file_name";
+
+                out.seekp(aux+12, std::ios::beg);
+                out << "informacoes.primeiro_sector";
+
+                out.seekp(aux+20, std::ios::beg);
+                out << "informacoes.size";
+
+                out.seekp(aux+24, std::ios::beg);
+                out << "informacoes.numero_setores";
+
+                temp = -1;
+        }}
 }
+
 
 void escrita_em_fs(copia informacoes){
 
@@ -107,6 +105,7 @@ void escrita_em_fs(copia informacoes){
 
     informacoes.primeiro_sector = 4608 + (informacoes.primeiro_sector*512);
     out.seekp(informacoes.primeiro_sector, std::ios::beg);
+    cout << informacoes.primeiro_sector;
 
     char k;
 
@@ -115,7 +114,7 @@ void escrita_em_fs(copia informacoes){
         out << k;
     }
 
-    cout << "SUAS INFORMAÇÕES FORAM GRAVADAS NO SISTEMA DE ARQUIVOS";
+    cout << "SUAS INFORMAÇÕES FORAM GRAVADAS NO SISTEMA DE ARQUIVOS NO ENDEREÇO " << informacoes.primeiro_sector;
 
 }
 
@@ -195,23 +194,47 @@ int main(){
         cin >> informacoes.file_name; 
 
         informacoes.size = file_size(informacoes);
-        if (informacoes.size == -1)
+        if (informacoes.size == -1){
+            cout << "ERRO! " << endl;
             return 0;
+        }
 
         cout << endl << "Para qual imagem você deseja fazer a cópia?" << endl;
         cin >> informacoes.image_name; 
 
         informacoes.numero_setores = informacoes.size/512;
 
-        informacoes.primeiro_sector = encontrar_primeiro_setor(informacoes);
-        if (informacoes.primeiro_sector < 0)
+         informacoes = encontrar_primeiro_setor(informacoes);
+         if (informacoes.primeiro_sector < 0){
+            cout << "ERRO! NÃO EXISTE ESPAÇO EM MEMORIA" << endl;
             return 0;
-
-        if(!aloca_entrada_rootdir(informacoes))
-            return 0;
-
+         }
         escrita_em_fs(informacoes);
 
+        ifstream in(informacoes.file_name);
+        ofstream out(informacoes.image_name);
+        int temp;
+
+        for(int i = 0; i < 128; i++){
+            int aux = 512+(i*32);
+            out.seekp(aux, std::ios::beg);
+            in >> temp;
+
+            if(temp == 0){
+                out.seekp(aux, std::ios::beg);
+                out << informacoes.file_name;
+
+                out.seekp(aux+12, std::ios::beg);
+                out << informacoes.primeiro_sector;
+
+                out.seekp(aux+20, std::ios::beg);
+                out << informacoes.size;
+
+                out.seekp(aux+24, std::ios::beg);
+                out << informacoes.numero_setores;
+                break;
+
+            }}        
         return 0;
 
     }default:
