@@ -54,15 +54,13 @@ int zeraRestoBR(bootRecord *bootRecord, int resto){
 }
 
 int bytemapPadrao(bytemap *bytemap, int setores_bytemap, int setor_dados){
-    //colocar os primeiros 9 setores ocupados no primeiro setor e depois ocupar o setor do bytemap
+    //colocar os primeiros 9 setores ocupados no primeiro setor e depois ocupar o setores do bytemap
     for(int i =0; i < 9; i++){
         bytemap->bytemap[0].setor[i] = 1;
     }
-   
-    if(setores_bytemap == 1){
-        bytemap->bytemap[0].setor[9 + setor_dados] = 1;
-    }else{
-        bytemap->bytemap[0].setor[9 + setor_dados] = 1;
+
+    for(int i =0; i < setores_bytemap; i++){
+        bytemap->bytemap[0].setor[9 + setor_dados + i] = 1;
     }
     
 }
