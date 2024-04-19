@@ -117,27 +117,33 @@ void escrita_em_fs(copia informacoes){
     writable_file.seekp(position);
     writable_file.write(reinterpret_cast<const char*>(&informacoes.numero_setores), sizeof(informacoes.numero_setores));
 
+    cout << endl << "AS INFORMAÇÕES SOBRE SEU ARQUIVO JÁ ESTÃO DISPONÍVEIS NO DIRETÓRIO RAÍZ NA ENTRADA NÚMERO " << informacoes.entrada_diretorio << endl;
+
     ifstream inn(informacoes.file_name);
     char k;
 
     for (int i = 0; i < informacoes.size; i++) {
         position = 512 * informacoes.primeiro_sector + i;
         inn.get(k);  
-        cout << k;
         writable_file.seekp(position);
         writable_file.write(reinterpret_cast<const char*>(&k), 1);
     }
+
+    cout << endl << "AS INFORMAÇÕES DE SEU ARQUIVO JÁ ESTÃO DISPONÍVEIS NA ÁREA DE DADOS, A PARTIR DO SETOR " << informacoes.primeiro_sector << " E OCUPA " << informacoes.numero_setores << " SETOR(ES)." << endl << endl;
+
     
     inn.close();
 
     k = 1;
     for (int i = 0; i < informacoes.numero_setores; i++) {
         position = 512 * informacoes.bitmap + informacoes.primeiro_sector+i; 
-        cout << "pos" << position;
         writable_file.seekp(position);
         writable_file.write(reinterpret_cast<const char*>(&k), 1);
+        cout << endl << "O SETOR NÚMERO " << informacoes.primeiro_sector+i << " AGORA ESTÁ OCUPADO" << endl;
     }
 }
+
+
 
 int main(){
 
@@ -164,5 +170,4 @@ int main(){
         }
 
        escrita_em_fs(informacoes);
-      //  ab(informacoes);
 }
