@@ -53,7 +53,7 @@ int zeraRestoBR(bootRecord *bootRecord, int resto){
     }
 }
 
-int bytemapPadrao(bytemap *bytemap, int setores_bytemap, int setor_dados){
+int bytemapPadrao(bytemap *bytemap, int setores_bytemap, int setor_dados, int setores_totais_bytemaps){
     //colocar os primeiros 9 setores ocupados no primeiro setor e depois ocupar o setores do bytemap
     for(int i =0; i < 9; i++){
         bytemap->bytemap[0].setor[i] = 1;
@@ -61,6 +61,13 @@ int bytemapPadrao(bytemap *bytemap, int setores_bytemap, int setor_dados){
 
     for(int i =0; i < setores_bytemap; i++){
         bytemap->bytemap[0].setor[9 + setor_dados + i] = 1;
+    }
+    
+    //preencher os acessos fantasmas
+    int ghost = setores_totais_bytemaps * 512 - 9 - setor_dados - setores_bytemap;
+    //printf("%d\n", ghost);
+    for(int i =0; i < ghost; i++){
+        bytemap->bytemap[0].setor[9 + setor_dados + setores_bytemap + i] = 1;
     }
     
 }
@@ -129,7 +136,7 @@ int main(int argc, char *argv[]) {
     bytemap.bytemap = bytemap.bytemap;
 
     //DEFININDO O BITMAP PADRÃO////////////////////////////////////////////////
-    bytemapPadrao(&bytemap, setores_bitmap, setores_area_de_dados);
+    bytemapPadrao(&bytemap, setores_bitmap, setores_area_de_dados, setores_bitmap);
 
    //ESCREVENDO A IMAGEM DE DISCO////////////////////////////////////////////
     FILE *file = fopen("disk_image.bin", "wb");
