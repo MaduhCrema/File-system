@@ -1,9 +1,7 @@
-#include <cmath> 
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <string.h>
-#include <math.h>
 
 using namespace std;
 
@@ -20,27 +18,29 @@ copia localiza_arquivo_fs(copia informacoes){
 
     char file_SA[12];
 
-    ifstream in(informacoes.image_name);
-    in.seekg(512, std::ios::beg);
+    FILE *fp;
+    fp = fopen(informacoes.image_name, "rb");
+
+    fseek(fp, 512, SEEK_SET);
+    fread(&informacoes.bitmap ,8,1, fp);
 
     for (int i = 0; i < 128; i++){
 
-        in.seekg(512+(i*32), std::ios::beg);
-        in.read(file_SA, 12);
+        fseek(fp, 512+(i*32), SEEK_SET);
+        fread(&file_SA, 12,1, fp);
+
         int resultado = strcmp(file_SA, informacoes.file_name);
 
         if (resultado == 0){
-            
+
+            cout <<endl << "ARQUIVO ENCONTRADO" << endl << endl;
             informacoes.entrada_diretorio = i;
-            cout << "informacoes.entrada_diretorio " << informacoes.entrada_diretorio << endl;
 
-            in.seekg(512+(i*32)+12, std::ios::beg);
-            in >> informacoes.primeiro_sector;
-            cout << "informacoes.primeiro_sector " << informacoes.primeiro_sector << endl;
+            fseek(fp, 512+(i*32)+12, SEEK_SET);
+            fread(&informacoes.primeiro_sector, 8,1, fp);
 
-            in.seekg(512+(i*32)+20, std::ios::beg);
-            in >> informacoes.size;
-            cout << "informacoes.size: " << informacoes.size << endl;
+            fseek(fp, 512+(i*32)+20, SEEK_SET);
+            fread(&informacoes.size, 4,1, fp);
 
             break;
         }
@@ -55,32 +55,49 @@ copia localiza_arquivo_fs(copia informacoes){
 
 void escrita_em_disco(copia informacoes){
 
-    ifstream in(informacoes.image_name);
-    std::ofstream out(informacoes.file_name);
+    FILE *fp;
+    fp = fopen(informacoes.image_name, "rb");
 
-    in.seekg(4608+(512*informacoes.primeiro_sector), std::ios::beg);
+    if (fp == nullptr) {
+        cout << "Erro ao abrir o arquivo de imagem.\n";
+        return;
+    }
+
+    std::ofstream out(informacoes.file_name);
+    if (!out.is_open()) {
+        cout << "Erro ao abrir o arquivo de saída.\n";
+        fclose(fp);
+        return;
+    }
 
     char k;
-    for (int i = 0; i < 17; i++){
-        in.get(k);
+
+    for (int i = 0; i < informacoes.size; i++){
+    fseek(fp,(512 * informacoes.primeiro_sector)+i, SEEK_SET);
+        fread(&k, 1, 1, fp);
         out << k;
     }
 
-    cout << "SUAS INFORMAÇÕES FORAM GRAVADAS NO SISTEMA DE ARQUIVOS";
+    fclose(fp);
+    out.close();
+
+    std::cout << "SUAS INFORMAÇÕES FORAM GRAVADAS NO SISTEMA DE ARQUIVOS" << std::endl;
 }
 
 int main(){
+
     copia informacoes;
-        cout << endl << "Qual o nome do arquivo que você deseja copiar para o disco?" << endl << endl;
-        cin >> informacoes.file_name; 
+    cout << endl << "Qual o nome do arquivo que você deseja copiar para o disco?" << endl << endl;
+    cin >> informacoes.file_name; 
 
-        cout << endl << "Em que imagem este arquivo está localizado?" << endl << endl;
-        cin >> informacoes.image_name; 
+    cout << endl << "Em que imagem este arquivo está localizado?" << endl << endl;
+    cin >> informacoes.image_name; 
 
-        informacoes = localiza_arquivo_fs(informacoes);
-        if (informacoes.primeiro_sector == -1)
-            return 0;
-        
-       //escrita_em_disco(informacoes);
+    informacoes = localiza_arquivo_fs(informacoes);
+    if (informacoes.primeiro_sector == -1)
         return 0;
+    
+    escrita_em_disco(informacoes);
+    
+    return 0;
 }
