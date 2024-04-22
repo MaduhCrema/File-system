@@ -24,7 +24,7 @@ copia localiza_arquivo_fs(copia informacoes){
     FILE *fp;
     fp = fopen(informacoes.image_name, "rb");
 
-    fseek(fp, 512, SEEK_SET);
+    fseek(fp, 14, SEEK_SET);
     fread(&informacoes.bitmap ,8,1, fp);
 
     for (int i = 0; i < 128; i++){
@@ -65,7 +65,7 @@ void excluir(copia informacoes){
         return;
     }
     
-    char excluido[3] = "E5";
+    unsigned char excluido = 229;
     
     std::streampos position = 512 + (informacoes.entrada_diretorio * 32);
     writable_file.seekp(position);
@@ -80,15 +80,18 @@ void bitmap(copia informacoes){
         return;
     }
     
-    char k;
-    k = 0;
     cout << informacoes.numero_setores;
+    informacoes.numero_setores =1;
+
     for (int i = 0; i < informacoes.numero_setores; i++) {
-        std::streampos position = 512 * informacoes.bitmap + informacoes.primeiro_sector+i; 
-        writable_file.seekp(position);
-        writable_file.write(reinterpret_cast<const char*>("0"), 1);
+
+    std::streampos position = (informacoes.bitmap*512)+informacoes.primeiro_sector+i;
+    writable_file.seekp(position);
+    char zero_byte = 0;
+    writable_file.write(&zero_byte, 1);
+
         cout << endl << "O SETOR NÚMERO " << informacoes.primeiro_sector+i << " AGORA ESTÁ LIVRE" << endl;
-}
+    }
 }
 
 int main(){
