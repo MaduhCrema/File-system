@@ -29,6 +29,9 @@ void listagem(char image_name[15]){
         if(file_SA[0] == 0)
             break;
 
+        if(file_SA[0] == -27)
+            continue;
+
         cout << "NOME: " << file_SA  << endl;
         cout << "TAMANHO: " << size  << endl;
         cout << "PRIMEIRO SETOR: " << primeiro_sector << endl << endl;
@@ -41,7 +44,7 @@ int main(){
 
     char file_SA[15];
     cout << "QUAL O NOME DA IMAGEM QUE VOCÊ DESEJA LISTAR OS ARQUIVOS?" << endl << endl;
-    cout << "Observação: caso seu arquivo não exista, ocorrerá segmentation fault e o programa será encerrado" << endl;
+    cout << "Observação: caso seu arquivo não exista, ocorrerá segmentation fault e o programa será encerrado" << endl << endl;
     cin >> file_SA;
 
     listagem(file_SA);
