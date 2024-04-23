@@ -14,7 +14,7 @@ typedef struct {
     long long int bitmap;
 }copia;
 
-copia localiza_arquivo_fs(copia informacoes){
+copia localiza(copia informacoes){
 
     char file_SA[12];
 
@@ -93,7 +93,7 @@ int main(){
     cout << endl << "Em que imagem este arquivo está localizado?" << endl << endl;
     cin >> informacoes.image_name; 
 
-    informacoes = localiza_arquivo_fs(informacoes);
+    informacoes = localiza(informacoes);
     if (informacoes.primeiro_sector == -1)
         return 0;
     
