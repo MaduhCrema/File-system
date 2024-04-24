@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
     bytemapPadrao(&bytemap, setores_bitmap, setores_area_de_dados, setores_bitmap);
 
    //ESCREVENDO A IMAGEM DE DISCO////////////////////////////////////////////
-    FILE *file = fopen("disk_image.bin", "wb");
+    FILE *file = fopen("disk_image.img", "wb");
 
     // escreve a estrutura do sistema de arquivos   
 
