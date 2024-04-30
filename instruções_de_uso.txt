@@ -11,5 +11,4 @@ AS INSTRUÇÕES ABAIXO SERVEM COMO GUIA PARA A UTILIZAÇÃO DO SISTEMA DE ARQUIV
     b. Sua execução é feita por meio de "./funcionalidades"
 
 OBSERVAÇÕES:
-- Caso a imagem ou o arquivo solicitados pelo sistema não existam, e no caso da imagem esteja vazia (sem nenhum byte), pode ocorrer
-segmentation fault ou entrar em um loop.
+- Caso a imagem esteja vazia (não formatada), pode ocorrer segmentation fault ou entrar em um loop.

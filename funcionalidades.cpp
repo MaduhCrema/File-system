@@ -292,6 +292,11 @@ void escrita_em_fs(copia informacoes){
     }
 }
 
+bool arquivoExiste(char image_name[15]) {
+    std::ifstream arquivo(image_name);
+    return arquivo.good(); 
+}
+
 int main(){
 
     char image_name[15];
@@ -300,6 +305,26 @@ int main(){
     cout << "Observação: caso seu arquivo não exista, ocorrerá segmentation fault e o programa será encerrado" << endl << endl;
     
     cin >> image_name; 
+  
+    if(!arquivoExiste(image_name)){
+        cout << "O ARQUIVO NAO EXISTE" << endl;
+        return 0;
+    }
+
+    bool teste = false;
+    for(int i = 0; i < sizeof(image_name); i++){    
+        if (image_name[i] == '.'){
+            teste = true;
+            if (image_name[i+1] != 'i' || image_name[i+2] != 'm' || image_name[i+3] != 'g'){
+                cout << "ERRO, NÃO É UMA IMAGEM" << endl;
+                return 0;
+        }}
+    }
+
+    if (!teste){
+        cout << "ERRO, NÃO É UMA IMAGEM" << endl;
+        return 0;
+    }
 
     while(1){
 
